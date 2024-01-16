@@ -4,26 +4,9 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
 
 # Sample data - replace this with your actual dataset
-courses_data = pd.DataFrame(
-    {
-        "course_id": [1, 2, 3, 4, 5],
-        "title": [
-            "Python Basics",
-            "Data Science Fundamentals",
-            "Machine Learning in Python",
-            "Web Development with Django",
-            "Java Programming",
-        ],
-    }
-)
+courses_data = pd.read_csv("./dataset/course.csv")
 
-user_enrollments = pd.DataFrame(
-    {
-        "user_id": [101, 102, 103, 104, 105],
-        "course_id": [1, 2, 1, 3, 4],  # Sample enrollment data
-        "rating": [5, 4, 5, 4, 3],  # Sample rating data
-    }
-)
+user_enrollments = pd.read_csv("./dataset/enrollments.csv")
 
 # Create a user-item matrix for collaborative filtering (KNN)
 user_course_matrix = user_enrollments.pivot_table(
@@ -36,13 +19,6 @@ knn_model_user.fit(user_course_matrix)
 
 # Create a course-item matrix for content-based filtering
 tfidf_vectorizer = TfidfVectorizer(stop_words="english")
-courses_data["description"] = [
-    "Learn Python programming basics",
-    "Explore fundamentals of data science",
-    "Master machine learning with Python",
-    "Build web applications with Django",
-    "Java programming for beginners",
-]
 tfidf_matrix_courses = tfidf_vectorizer.fit_transform(courses_data["description"])
 
 # Compute similarity scores using linear kernel
@@ -66,8 +42,7 @@ def content_based_recommendations(course_title, cosine_sim=cosine_sim_courses):
     sim_scores = list(enumerate(cosine_sim[idx]))
     sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
     sim_scores = sim_scores[1:6]  # Exclude the course itself
-    course_indices = [i[0] for i in sim_scores]
-    return courses_data["title"].iloc[course_indices]
+    return courses_data["title"]
 
 
 # Function to get hybrid recommendations
@@ -93,8 +68,8 @@ def hybrid_recommendations(
 
 
 # Example usage
-user_id = 101
-course_title = "Python Basics"
+user_id = 900
+course_title = "DP-900 Azure Data Fundamentals Exam Prep In One Day"
 recommendations = hybrid_recommendations(
     user_id, course_title, knn_model_user, user_course_matrix
 )
